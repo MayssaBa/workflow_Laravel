@@ -1,162 +1,36 @@
-
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'WorkFlow360')</title>
+        <title>{{ config('app.name', 'Laravel') }}</title>
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f6fa;
-            color: #333;
-        }
+        <!-- Scripts -->
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    </head>
+    <body class="font-sans antialiased">
+        <div class="min-h-screen bg-gray-100">
+            @include('layouts.navigation')
 
-        .layout {
-            display: flex;
-            min-height: 100vh;
-        }
+            <!-- Page Heading -->
+            @isset($header)
+                <header class="bg-white shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endisset
 
-        /* Sidebar */
-        .sidebar {
-            width: 240px;
-            background-color: #1f2937;
-            color: white;
-            padding: 20px;
-        }
-
-        .logo {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 35px;
-        }
-
-        .sidebar ul {
-            list-style: none;
-        }
-
-        .sidebar li {
-            margin-bottom: 10px;
-        }
-
-        .sidebar a {
-            display: block;
-            color: #d1d5db;
-            text-decoration: none;
-            padding: 12px;
-            border-radius: 6px;
-        }
-
-        .sidebar a:hover {
-            background-color: #374151;
-            color: white;
-        }
-
-        /* Partie principale */
-        .main {
-            flex: 1;
-        }
-
-        /* Navbar */
-        .navbar {
-            height: 70px;
-            background-color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 30px;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .navbar h2 {
-            font-size: 20px;
-        }
-
-        .user {
-            color: #555;
-        }
-
-        /* Contenu */
-        .content {
-            padding: 30px;
-        }
-    </style>
-</head>
-
-<body>
-
-<div class="layout">
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-
-        <div class="logo">
-            WorkFlow360
+            <!-- Page Content -->
+            <main>
+                {{ $slot }}
+            </main>
         </div>
-
-        <ul>
-            <li>
-                <a href="#"> Accueil</a>
-            </li>
-
-            <li>
-                <a href="#"> Mes tâches</a>
-            </li>
-
-            <li>
-                <a href="#"> Projets</a>
-            </li>
-
-            <li>
-                <a href="#"> Mes demandes</a>
-            </li>
-
-            <li>
-                <a href="#"> Équipe</a>
-            </li>
-
-            <li>
-                <a href="#"> Profil</a>
-            </li>
-        </ul>
-
-    </aside>
-
-
-    <!-- Contenu principal -->
-    <main class="main">
-
-        <!-- Navbar -->
-        <nav class="navbar">
-
-            <h2>@yield('page-title', 'Tableau de bord')</h2>
-
-            <div class="user">
-                👤 Utilisateur
-            </div>
-
-        </nav>
-
-
-        <!-- Contenu de la page -->
-        <section class="content">
-
-            @yield('content')
-
-        </section>
-
-    </main>
-
-</div>
-
-</body>
+    </body>
 </html>
-```
