@@ -27,7 +27,7 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    protected $table = 'users_app';
+    protected $table = 'users';
 
     protected function casts(): array
     {
@@ -62,7 +62,7 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(
             Project::class,
-            'project_user_app',
+            'project_user',
             'user_id',
             'project_id'
         )->withTimestamps();
@@ -75,10 +75,7 @@ class User extends Authenticatable
 
     public function sentRequests(): HasMany
     {
-        return $this->hasMany(
-            \App\Models\Request::class,
-            'sender_id'
-        );
+        return $this->hasMany(InternalRequest::class, 'sender_id');
     }
 
     public function aiConversations(): HasMany
