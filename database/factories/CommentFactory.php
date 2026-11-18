@@ -5,6 +5,27 @@ namespace Database\Factories;
 use App\Models\Comment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+class CommentFactory extends Factory
+{
+    /** @var string */
+    protected $model = Comment::class;
+
+    public function definition(): array
+    {
+        return [
+            'body' => $this->faker->sentence,
+            'task_id' => rand(1, 100),
+            'user_id' => rand(1, 10),
+        ];
+    }
+}
+?>
+
+namespace Database\Factories;
+
+use App\Models\Comment;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
 /**
  * @extends Factory<Comment>
  */

@@ -1,0 +1,7 @@
+@props(['type' => 'success'])
+
+<div role="alert"
+    {{ $attributes->merge(['class' => "alert alert-$type alert-dismissible fade show shadow-sm"]) }}>
+    {{ $slot }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+</div>

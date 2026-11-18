@@ -38,10 +38,18 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Default dashboard (keep for now)
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth')->name('dashboard');
+Route::middleware(['auth', 'active'])
+    ->get('/dashboard', function () {
+        $user = auth()->user();
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+        if ($user->isManager()) {
+            return redirect()->route('manager.dashboard');
+        }
+        return redirect()->route('employee.dashboard');
+    })
+    ->name('dashboard');
 
 // Profile routes
 Route::middleware(['auth', 'active'])->group(function () {
