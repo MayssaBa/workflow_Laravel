@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Department;
+use App\Models\User;
 
 class Team extends Model
 {
@@ -18,6 +20,7 @@ class Team extends Model
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
+
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'team_id');

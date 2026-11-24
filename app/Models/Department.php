@@ -4,6 +4,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Team;
 
 
 class Department extends Model
@@ -11,8 +12,8 @@ class Department extends Model
     use HasFactory;
     protected $fillable = ['name',];
 
-    public function teams(): HasMAny
+    public function teams(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(Team::class, 'departement_id');
+        return $this->hasMany(Team::class, 'department_id');
     }
 }
