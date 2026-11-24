@@ -1,164 +1,78 @@
-<x-app-layout>
+@extends('layouts.admin.template')
 
-    {{-- En-tête --}}
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Gestion des employés
-        </h2>
-    </x-slot>
+@section('title', 'Gestion des employés')
 
-    {{-- Contenu principal --}}
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
-            {{-- Titre et bouton Ajouter --}}
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-800">
-                        Gestion des employés
-                    </h1>
-
-                    <p class="text-sm text-gray-500 mt-1">
-                        Gérer les employés de votre organisation.
-                    </p>
-                </div>
-
-                <a href="{{ route('admin.employees.create') }}"
-                    class="inline-flex items-center px-5 py-3 bg-indigo-600 text-black font-semibold rounded-lg shadow hover:bg-indigo-700">
-                    Ajouter un employé
-                </a>
-            </div>
-
-            {{-- Message de succès --}}
-            @if (session('success'))
-                <div class="mb-4 p-4 bg-green-100 text-green-800 rounded-md">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            {{-- Message d'erreur --}}
-            @if (session('error'))
-                <div class="mb-4 p-4 bg-red-100 text-red-800 rounded-md">
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            {{-- Tableau des employés --}}
-            <div class="bg-white shadow-sm sm:rounded-lg overflow-hidden">
-                <div class="p-6">
-
-                    <h3 class="text-lg font-semibold mb-4">
-                        Liste des employés
-                    </h3>
-
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        Nom
-                                    </th>
-
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        Email
-                                    </th>
-
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        Téléphone
-                                    </th>
-
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        Équipe
-                                    </th>
-
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        Département
-                                    </th>
-
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                        Statut
-                                    </th>
-
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                                        Actions
-                                    </th>
-                                </tr>
-                            </thead>
-
-                            <tbody class="bg-white divide-y divide-gray-200">
-
-                                @forelse ($employees as $employee)
-
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $employee->name }}
-                                        </td>
-
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                            {{ $employee->email }}
-                                        </td>
-
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                            {{ $employee->phone ?? 'Non renseigné' }}
-                                        </td>
-
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                            {{ $employee->team->name ?? 'Non affecté' }}
-                                        </td>
-
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                            {{ $employee->team->department->name ?? 'Non affecté' }}
-                                        </td>
-
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @if ($employee->is_active)
-                                                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                                                    Actif
-                                                </span>
-                                            @else
-                                                <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
-                                                    Désactivé
-                                                </span>
-                                            @endif
-                                        </td>
-
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                            <a href="{{ route('admin.employees.show', $employee) }}"
-                                                class="text-indigo-600 hover:text-indigo-900">
-                                                Consulter
-                                            </a>
-
-                                            <a href="{{ route('admin.employees.edit', $employee) }}"
-                                                class="ml-3 text-blue-600 hover:text-blue-900">
-                                                Modifier
-                                            </a>
-                                        </td>
-                                    </tr>
-
-                                @empty
-
-                                    <tr>
-                                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
-                                            Aucun employé trouvé.
-                                        </td>
-                                    </tr>
-
-                                @endforelse
-
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {{-- Pagination --}}
-                    <div class="mt-6">
-                        {{ $employees->links() }}
-                    </div>
-
-                </div>
-            </div>
-
+@section('content')
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">Gestion des employés</h1>
+            <p class="text-secondary mb-0">Gérez les employés de votre organisation.</p>
         </div>
+
+        <a href="{{ route('admin.employees.create') }}" class="btn btn-primary">
+            Ajouter un employé
+        </a>
     </div>
 
-</x-app-layout>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="h5 fw-semibold mb-3">Liste des employés</h2>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Nom</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Téléphone</th>
+                            <th scope="col">Équipe</th>
+                            <th scope="col">Département</th>
+                            <th scope="col">Statut</th>
+                            <th scope="col" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($employees as $employee)
+                            <tr>
+                                <td class="fw-semibold">{{ $employee->name }}</td>
+                                <td>{{ $employee->email }}</td>
+                                <td>{{ $employee->phone ?? 'Non renseigné' }}</td>
+                                <td>{{ $employee->team->name ?? 'Non affecté' }}</td>
+                                <td>{{ $employee->team->department->name ?? 'Non affecté' }}</td>
+                                <td>
+                                    <x-status-badge :status="$employee->is_active ? 'active' : 'inactive'" />
+                                </td>
+                                <td class="text-end text-nowrap">
+                                    <a href="{{ route('admin.employees.show', $employee) }}"
+                                        class="btn btn-sm btn-outline-primary">Consulter</a>
+
+                                    <span class="btn btn-sm btn-outline-secondary disabled" aria-disabled="true"
+                                        title="bientôt disponible">Modifier</span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7">
+                                    <x-ui.empty-state icon="bi-people" title="Aucun employé"
+                                        text="Ajoutez un premier employé pour commencer.">
+                                        <x-slot:action>
+                                            <a href="{{ route('admin.employees.create') }}" class="btn btn-primary btn-sm">
+                                                Ajouter un employé
+                                            </a>
+                                        </x-slot:action>
+                                    </x-ui.empty-state>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            @if ($employees->hasPages())
+                <div class="mt-4">
+                    {{ $employees->links() }}
+                </div>
+            @endif
+        </div>
+    </div>
+@endsection

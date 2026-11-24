@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DeleteAccountRequest;
+use App\Http\Requests\ProfileUpdateRequest;
+use App\Http\Requests\UpdatePasswordRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-use Illuminate\Validation\Rules\Password;
-use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
-
     public function edit(Request $request): View
     {
         return view('profile.edit', [
@@ -21,58 +20,64 @@ class ProfileController extends Controller
         ]);
     }
 
-
-    public function update(Request $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-                \Illuminate\Validation\Rule::unique('users', 'email')
-                    ->ignore($request->user()->id),
-            ],
-            'phone' => ['nullable', 'string', 'max:20'],
-        ]);
-
         $user = $request->user();
+        $validated = $request->safe()->only(['name', 'email', 'phone']);
 
         if ($user->email !== $validated['email']) {
-            $validated['email_verified_at'] = null;
+            $user->email_verified_at = null;
+        }
+
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+
+            if ($user->avatar_path) {
+                Storage::disk('public')->delete($user->avatar_path);
+            }
+
+            $user->avatar_path = $avatarPath;
+            $message = 'Photo de profil et informations mises à jour.';
+        } else {
+            $message = 'Profil mis à jour.';
         }
 
         $user->update($validated);
 
         return redirect()->route('profile.edit')
-            ->with('status', 'profile-updated');
+            ->with('success', $message);
     }
 
-    public function updatePassword(Request $request): RedirectResponse
+    public function updatePassword(UpdatePasswordRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'confirmed', Password::defaults()],
-        ]);
-
         $request->user()->update([
-            'password' => Hash::make($validated['password']),
+            'password' => $request->validated()['password'],
         ]);
 
-        return Redirect::route('profile.edit')
-            ->with('status', 'password-updated');
+        return redirect()->route('profile.edit')
+            ->with('success', 'Mot de passe modifié.');
     }
 
-
-    public function destroy(Request $request): RedirectResponse
+    public function destroyAvatar(Request $request): RedirectResponse
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
-
         $user = $request->user();
+
+        if ($user->avatar_path) {
+            Storage::disk('public')->delete($user->avatar_path);
+            $user->update(['avatar_path' => null]);
+        }
+
+        return redirect()->route('profile.edit')
+            ->with('success', 'Photo de profil supprimée.');
+    }
+
+    public function destroy(DeleteAccountRequest $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($user->avatar_path) {
+            Storage::disk('public')->delete($user->avatar_path);
+        }
 
         Auth::logout();
 
@@ -81,6 +86,6 @@ class ProfileController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Redirect::to('/');
+        return redirect()->to('/');
     }
 }

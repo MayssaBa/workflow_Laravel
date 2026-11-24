@@ -1,56 +1,45 @@
-<x-guest-layout>
-    <div class="mb-6 text-center">
-        <h1 class="text-2xl font-bold text-gray-800">
-            Projects Manager 360
-        </h1>
-        <p class="mt-2 text-sm text-gray-500">
-            Sign in to manage your projects and tasks
-        </p>
+@extends('layouts.auth.template')
+
+@section('title', 'Connexion')
+
+@section('content')
+    <div class="mb-4">
+        <h1 class="h3 fw-bold mb-2">Bon retour sur Teamo</h1>
+        <p class="text-secondary small mb-0">Connectez-vous pour retrouver vos projets, vos tâches et vos équipes.</p>
     </div>
 
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    @if (session('status'))
+        <x-alert type="success" class="small mb-4">{{ session('status') }}</x-alert>
+    @endif
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('login') }}" data-loading>
         @csrf
 
-        <div>
-            <x-input-label for="email" :value="__('Email Address')" />
-
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required
-                autofocus autocomplete="username" placeholder="Enter your email" />
-
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="row g-3">
+            <x-form.input field="email" label="Adresse e-mail" type="email" :value="old('email')"
+                autocomplete="username" autofocus placeholder="vous@exemple.com" />
+            <x-form.password field="password" label="Mot de passe" autocomplete="current-password"
+                placeholder="Votre mot de passe" />
         </div>
 
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+        <div class="d-flex align-items-center justify-content-between gap-3 my-4">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="remember" id="remember_me">
+                <label class="form-check-label small" for="remember_me">Se souvenir de moi</label>
+            </div>
 
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required
-                autocomplete="current-password" placeholder="Enter your password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox"
-                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">
-                    Remember me
-                </span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-between mt-6">
             @if (Route::has('password.request'))
-                <a class="text-sm text-indigo-600 hover:text-indigo-800 underline" href="{{ route('password.request') }}">
-                    Forgot password?
-                </a>
+                <a class="small text-decoration-none" href="{{ route('password.request') }}">Mot de passe oublié ?</a>
             @endif
-
-            <x-primary-button>
-                Sign In
-            </x-primary-button>
         </div>
+
+        <x-form.submit label="Se connecter" class="w-100" />
+
+        @if (Route::has('register'))
+            <p class="text-center text-secondary small mt-4 mb-0">
+                Vous n’avez pas encore de compte ?
+                <a class="text-decoration-none" href="{{ route('register') }}">Créer un compte</a>
+            </p>
+        @endif
     </form>
-</x-guest-layout>
+@endsection

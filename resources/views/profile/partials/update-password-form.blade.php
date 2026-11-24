@@ -1,50 +1,44 @@
 <section>
-    <header>
-        <h2 class="text-lg font-medium text-gray-900">
-            Modifier le mot de passe
-        </h2>
+    <h2 class="h5 fw-bold mb-1">Sécurité</h2>
+    <p class="text-secondary small mb-4">Choisissez un mot de passe sécurisé pour protéger votre compte.</p>
 
-        <p class="mt-1 text-sm text-gray-600">
-            Choisissez un mot de passe sécurisé pour protéger votre compte.
-        </p>
-    </header>
-
-    <form method="post" action="{{ route('profile.password.update') }}" class="mt-6 space-y-6">
+    <form method="POST" action="{{ route('profile.password.update') }}" data-loading data-unsaved-warning>
         @csrf
-        @method('put')
+        @method('PUT')
 
-        <!-- Current password -->
-        <div>
-            <x-input-label for="current_password" value="Mot de passe actuel" />
-            <x-text-input id="current_password" name="current_password" type="password" class="mt-1 block w-full"
-                autocomplete="current-password" required />
-            <x-input-error :messages="$errors->get('current_password')" class="mt-2" />
+        <div class="row g-3">
+            <x-form.password col="6" field="current_password" label="Mot de passe actuel"
+                autocomplete="current-password" />
+            <x-form.password col="6" field="password" label="Nouveau mot de passe" autocomplete="new-password"
+                help="Au moins 8 caractères, une majuscule, un chiffre et un symbole." data-password-strength-input />
+
+            <div class="col-12">
+                <div class="teamo-password-strength" data-password-strength data-level="0" aria-live="polite">
+                    <div class="d-flex gap-1" aria-hidden="true">
+                        <span data-strength-segment></span>
+                        <span data-strength-segment></span>
+                        <span data-strength-segment></span>
+                        <span data-strength-segment></span>
+                    </div>
+                    <div class="d-flex flex-wrap column-gap-3 row-gap-1 mt-2 small text-secondary">
+                        <span data-strength-rule="length">8 caractères minimum</span>
+                        <span data-strength-rule="uppercase">Une majuscule</span>
+                        <span data-strength-rule="digit">Un chiffre</span>
+                        <span data-strength-rule="symbol">Un symbole</span>
+                    </div>
+                    <span class="visually-hidden" data-strength-label>Force du mot de passe</span>
+                </div>
+            </div>
+
+            <x-form.password col="6" field="password_confirmation" label="Confirmer le nouveau mot de passe"
+                autocomplete="new-password" help="La confirmation doit correspondre au mot de passe."
+                data-password-confirmation-input data-password-confirmation-target="password"
+                data-password-confirmation-feedback="password_confirmation-help" />
         </div>
 
-        <!-- New password -->
-        <div>
-            <x-input-label for="password" value="Nouveau mot de passe" />
-            <x-text-input id="password" name="password" type="password" class="mt-1 block w-full"
-                autocomplete="new-password" required />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Confirm password -->
-        <div>
-            <x-input-label for="password_confirmation" value="Confirmer le nouveau mot de passe" />
-            <x-text-input id="password_confirmation" name="password_confirmation" type="password"
-                class="mt-1 block w-full" autocomplete="new-password" required />
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center gap-4">
-            <x-primary-button>Enregistrer le nouveau mot de passe</x-primary-button>
-
-            @if (session('status') === 'password-updated')
-                <p class="text-sm text-green-600">
-                    Mot de passe modifié avec succès.
-                </p>
-            @endif
+        <div class="d-flex flex-wrap align-items-center gap-3 mt-4">
+            <x-form.submit label="Enregistrer le nouveau mot de passe" />
+            <button type="button" class="btn btn-outline-secondary" data-unsaved-reset>Annuler</button>
         </div>
     </form>
 </section>

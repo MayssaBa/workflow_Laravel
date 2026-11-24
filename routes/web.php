@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
 
 // ==========================================
 // ADMIN ROUTES
@@ -21,7 +21,6 @@ Route::middleware(['auth', 'active', 'role:admin'])
         Route::resource('employees', EmployeeController::class);
     });
 
-
 // ==========================================
 // MANAGER ROUTES
 // ==========================================
@@ -35,7 +34,6 @@ Route::middleware(['auth', 'active', 'role:manager'])
             return view('dashboard.manager');
         })->name('dashboard');
     });
-
 
 // ==========================================
 // EMPLOYEE ROUTES
@@ -51,14 +49,12 @@ Route::middleware(['auth', 'active', 'role:employee'])
         })->name('dashboard');
     });
 
-
 // ==========================================
 // HOMEPAGE
 // ==========================================
 Route::get('/', function () {
     return redirect()->route('login');
 });
-
 
 // ==========================================
 // GENERAL DASHBOARD REDIRECTION
@@ -80,7 +76,6 @@ Route::middleware(['auth', 'active'])
 
     })->name('dashboard');
 
-
 // ==========================================
 // PROFILE ROUTES
 // ==========================================
@@ -98,13 +93,16 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])
         ->name('profile.password.update');
 
+    // Delete profile photo
+    Route::delete('/profile/avatar', [ProfileController::class, 'destroyAvatar'])
+        ->name('profile.avatar.destroy');
+
     // Delete account
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
 });
 
-
 // ==========================================
 // AUTHENTICATION ROUTES
 // ==========================================
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

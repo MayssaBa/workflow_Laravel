@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\RequestReplyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,16 +27,4 @@ class RequestReply extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-}
-?>
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class RequestReply extends Model
-{
-    /** @use HasFactory<\Database\Factories\RequestReplyFactory> */
-    use HasFactory;
 }

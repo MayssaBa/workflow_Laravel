@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\IssueFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,9 +13,9 @@ class Issue extends Model
     use HasFactory;
 
     protected $fillable = [
-        'description',
         'status',
         'resolved_by',
+        'task_id',
     ];
 
     protected $casts = [
@@ -35,16 +36,4 @@ class Issue extends Model
     {
         return $this->belongsTo(User::class, 'resolved_by');
     }
-}
-?>
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Issue extends Model
-{
-    /** @use HasFactory<\Database\Factories\IssueFactory> */
-    use HasFactory;
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\TaskHistoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,9 +13,8 @@ class TaskHistory extends Model
     use HasFactory;
 
     protected $fillable = [
-        'action',
-        'old_value',
-        'new_value',
+        'task_id',
+        'user_id',
     ];
 
     public function task(): BelongsTo
@@ -26,16 +26,4 @@ class TaskHistory extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-}
-?>
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class TaskHistory extends Model
-{
-    /** @use HasFactory<\Database\Factories\TaskHistoryFactory> */
-    use HasFactory;
 }

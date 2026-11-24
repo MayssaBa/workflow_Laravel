@@ -1,25 +1,31 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+@extends('layouts.auth.template')
+
+@section('title', 'Mot de passe oublié')
+
+@section('content')
+    <div class="mb-4">
+        <h1 class="h3 fw-bold mb-2">Mot de passe oublié ?</h1>
+        <p class="text-secondary small mb-0">
+            Indiquez votre adresse e-mail et nous vous enverrons un lien de réinitialisation.
+        </p>
     </div>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    @if (session('status'))
+        <x-alert type="success" class="small mb-4">{{ session('status') }}</x-alert>
+    @endif
 
-    <form method="POST" action="{{ route('password.email') }}">
+    <form method="POST" action="{{ route('password.email') }}" data-loading>
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
+        <x-form.input field="email" label="Adresse e-mail" type="email" :value="old('email')"
+            autocomplete="username" autofocus placeholder="vous@exemple.com" />
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
+        <x-form.submit label="Envoyer le lien" class="w-100 mt-4" />
     </form>
-</x-guest-layout>
+
+    @if (Route::has('login'))
+        <p class="text-center text-secondary small mt-4 mb-0">
+            <a class="text-decoration-none" href="{{ route('login') }}">Retour à la connexion</a>
+        </p>
+    @endif
+@endsection

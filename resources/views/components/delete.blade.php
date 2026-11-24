@@ -1,7 +1,13 @@
-@props(['action', 'message' => 'Voulez-vous vraiment supprimer cet élément ?', 'label' => 'Supprimer'])
+@props(['action', 'message' => 'Voulez-vous vraiment désactiver cet employé ?', 'label' => 'Désactiver', 'title' => 'Confirmer la désactivation', 'confirmLabel' => 'Désactiver', 'method' => 'DELETE', 'errorBag' => null])
 
-<form method="post" action="{{ $action }}" onsubmit="return confirm(@js($message));">
-    @csrf
-    @method('delete')
-    <button class="btn btn-sm btn-outline-danger" type="submit">{{ $label }}</button>
-</form>
+@php
+    $modalId = 'confirm-' . md5($action);
+@endphp
+
+<button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#{{ $modalId }}"
+    aria-label="{{ $label }}">
+    {{ $label }}
+</button>
+
+<x-ui.modal :id="$modalId" :title="$title" :description="$message" size="md" :form-action="$action"
+    :method="$method" :confirm-label="$confirmLabel" confirm-variant="danger" :error-bag="$errorBag" :open-on-error="true" />
