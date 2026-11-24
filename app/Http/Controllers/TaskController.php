@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTaskRequest;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\TaskHistory;
 use App\Models\User;
 use App\Notifications\TaskAssigned;
 use App\Notifications\TaskUpdated;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -83,14 +85,19 @@ class TaskController extends Controller
     {
         Gate::authorize('create', Task::class);
 
-        $projects = Project::orderBy('name')->get();
+        $projects = Project::with([
+            'users' => function ($query) {
+                $query->where('role', 'employee')
+                    ->where('is_active', true)
+                    ->orderBy('name');
+            },
+        ])->orderBy('name')->get();
 
-        $employees = User::where('role', 'employee')
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get();
-
-        return view('tasks.create', compact('projects', 'employees'));
+        return view('tasks.create', [
+            'projects' => $projects,
+            'employeesByProject' => $this->employeesByProject($projects),
+            'manageableProjectIds' => $this->manageableProjectIds($projects),
+        ]);
     }
 
     /**
@@ -102,25 +109,10 @@ class TaskController extends Controller
 
         $validated = $request->validated();
 
-        $relations = $request->validate([
-            'project_id' => ['nullable', 'exists:projects,id'],
-            'assigned_to' => [
-                'nullable',
-                Rule::exists('users', 'id')->where(function ($query) {
-                    $query->where('role', 'employee')
-                        ->where('is_active', true);
-                }),
-            ],
-        ]);
-
-        $task = Task::create(array_merge(
-            $validated,
-            $relations,
-            [
-                'created_by' => auth()->id(),
-                'status' => 'todo',
-            ]
-        ));
+        $task = Task::create(array_merge($validated, [
+            'created_by' => auth()->id(),
+            'status' => 'todo',
+        ]));
 
         // Notification envoyée à l'employé assigné.
         if ($task->assigned_to !== null) {
@@ -150,6 +142,8 @@ class TaskController extends Controller
             'histories.user',
         ]);
 
+        TaskHistory::primeNameMaps($task->histories);
+
         return view('tasks.show', compact('task'));
     }
 
@@ -160,40 +154,30 @@ class TaskController extends Controller
     {
         Gate::authorize('update', $task);
 
-        $projects = Project::orderBy('name')->get();
+        $projects = Project::with([
+            'users' => function ($query) {
+                $query->where('role', 'employee')
+                    ->where('is_active', true)
+                    ->orderBy('name');
+            },
+        ])->orderBy('name')->get();
 
-        $employees = User::where('role', 'employee')
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get();
-
-        return view('tasks.edit', compact('task', 'projects', 'employees'));
+        return view('tasks.edit', [
+            'task' => $task,
+            'projects' => $projects,
+            'employeesByProject' => $this->employeesByProject($projects),
+            'manageableProjectIds' => $this->manageableProjectIds($projects),
+        ]);
     }
 
     /**
      * Modifier les informations d'une tâche.
      */
-    public function update(Request $request, Task $task): RedirectResponse
+    public function update(StoreTaskRequest $request, Task $task): RedirectResponse
     {
         Gate::authorize('update', $task);
 
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'priority' => [
-                'required',
-                Rule::in(['low', 'medium', 'high', 'urgent']),
-            ],
-            'due_date' => ['nullable', 'date'],
-            'project_id' => ['nullable', 'exists:projects,id'],
-            'assigned_to' => [
-                'nullable',
-                Rule::exists('users', 'id')->where(function ($query) {
-                    $query->where('role', 'employee')
-                        ->where('is_active', true);
-                }),
-            ],
-        ]);
+        $validated = $request->validated();
 
         // Remplir les nouvelles valeurs.
         $task->fill($validated);
@@ -266,5 +250,25 @@ class TaskController extends Controller
         return redirect()
             ->route('tasks.index')
             ->with('success', 'La tâche a été supprimée avec succès.');
+    }
+
+    private function employeesByProject(Collection $projects): array
+    {
+        return $projects->mapWithKeys(function (Project $project): array {
+            return [
+                $project->id => $project->users->mapWithKeys(fn (User $employee): array => [
+                    $employee->id => $employee->name,
+                ])->all(),
+            ];
+        })->all();
+    }
+
+    private function manageableProjectIds(Collection $projects): array
+    {
+        return $projects
+            ->filter(fn (Project $project): bool => Gate::allows('manageMembers', $project))
+            ->pluck('id')
+            ->map(fn (int|string $id): int => (int) $id)
+            ->all();
     }
 }

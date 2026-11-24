@@ -23,6 +23,15 @@
             </div>
         @endif
 
+        @php
+            $selectedProject = $projects->firstWhere('id', old('project_id', $task->project_id));
+            $selectedEmployees = $selectedProject !== null
+                ? ($employeesByProject[$selectedProject->id] ?? [])
+                : [];
+            $canManageSelectedProject = $selectedProject !== null
+                && in_array((int) $selectedProject->id, $manageableProjectIds, true);
+        @endphp
+
         <div class="card shadow-sm">
             <div class="card-header">
                 <h5 class="mb-0">Modifier les informations</h5>
@@ -85,13 +94,23 @@
 
                                 <option value="">Non assignée</option>
 
-                                @foreach($employees as $employee)
-                                    <option value="{{ $employee->id }}" {{ old('assigned_to', $task->assigned_to) == $employee->id ? 'selected' : '' }}>
-                                        {{ $employee->name }}
+                                @foreach($selectedEmployees as $id => $name)
+                                    <option value="{{ $id }}" {{ old('assigned_to', $task->assigned_to) == $id ? 'selected' : '' }}>
+                                        {{ $name }}
                                     </option>
                                 @endforeach
 
                             </select>
+
+                            <div id="project-employee-empty" class="alert alert-warning py-2 small mt-2" @if($selectedProject !== null && ! empty($selectedEmployees)) hidden @endif>
+                                <span id="project-employee-empty-text">
+                                    {{ $selectedProject !== null ? 'Aucun employé dans ce projet' : 'Sélectionnez un projet pour afficher ses employés.' }}
+                                </span>
+
+                                <a id="project-members-link" href="{{ $selectedProject !== null ? route('projects.show', $selectedProject) : '#' }}" class="alert-link" @if(! $canManageSelectedProject) hidden @endif>
+                                    Ajouter des membres
+                                </a>
+                            </div>
                         </div>
 
                     </div>
@@ -155,5 +174,60 @@
         </div>
 
     </div>
+
+@push('scripts')
+<script>
+    const employeesByProject = {{ Illuminate\Support\Js::from($employeesByProject) }};
+    const manageableProjectIds = {{ Illuminate\Support\Js::from($manageableProjectIds) }};
+    const projectBaseUrl = {{ Illuminate\Support\Js::from(route('projects.index')) }};
+    const initialAssignedTo = {{ Illuminate\Support\Js::from((string) old('assigned_to', $task->assigned_to)) }};
+    const projectSelect = document.getElementById('project_id');
+    const employeeSelect = document.getElementById('assigned_to');
+    const emptyState = document.getElementById('project-employee-empty');
+    const emptyText = document.getElementById('project-employee-empty-text');
+    const memberLink = document.getElementById('project-members-link');
+    let isInitialRender = true;
+
+    function updateEmployeeOptions() {
+        const projectId = projectSelect.value;
+        const employees = projectId === '' ? {} : (employeesByProject[projectId] ?? {});
+        const currentEmployeeId = employeeSelect.value;
+        const preferredEmployeeId = isInitialRender ? initialAssignedTo : currentEmployeeId;
+
+        employeeSelect.replaceChildren();
+
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = 'Non assignée';
+        employeeSelect.append(emptyOption);
+
+        Object.entries(employees).forEach(([id, name]) => {
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = name;
+            employeeSelect.append(option);
+        });
+
+        if (employees[preferredEmployeeId] !== undefined) {
+            employeeSelect.value = preferredEmployeeId;
+        }
+
+        const hasMembers = Object.keys(employees).length > 0;
+        emptyState.hidden = projectId !== '' && hasMembers;
+        emptyText.textContent = projectId === ''
+            ? 'Sélectionnez un projet pour afficher ses employés.'
+            : 'Aucun employé dans ce projet';
+
+        const canManage = manageableProjectIds.includes(Number(projectId));
+        memberLink.hidden = ! canManage || projectId === '';
+        memberLink.href = projectId === '' ? '#' : projectBaseUrl + '/' + projectId;
+
+        isInitialRender = false;
+    }
+
+    projectSelect.addEventListener('change', updateEmployeeOptions);
+    updateEmployeeOptions();
+</script>
+@endpush
 
 @endsection

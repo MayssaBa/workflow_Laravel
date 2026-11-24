@@ -1,11 +1,9 @@
-
 @extends('layouts.admin.template')
+
+@section('title', 'Détails de la tâche')
 
 @section('content')
 
-<div class="alert alert-warning">
-    TEST: TASK DETAILS VIEW IS DISPLAYED
-</div>
 <div class="container-fluid">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -16,14 +14,12 @@
         </a>
     </div>
 
-    {{-- Messages de succès --}}
     @if(session('success'))
         <div class="alert alert-success">
             {{ session('success') }}
         </div>
     @endif
 
-    {{-- Erreurs de validation --}}
     @if($errors->any())
         <div class="alert alert-danger">
             <ul class="mb-0">
@@ -34,7 +30,6 @@
         </div>
     @endif
 
-    {{-- Informations générales --}}
     <div class="card shadow-sm mb-4">
         <div class="card-header">
             <h5 class="mb-0">Informations générales</h5>
@@ -67,7 +62,7 @@
 
             <p>
                 <strong>Priorité :</strong>
-                {{ ucfirst($task->priority) }}
+                {{ \App\Enums\TaskPriority::tryFrom($task->priority)?->label() ?? $task->priority }}
             </p>
 
             <p>
@@ -114,7 +109,6 @@
         </div>
     </div>
 
-    {{-- Modification du statut --}}
     @can('updateStatus', $task)
         <div class="card shadow-sm mb-4">
             <div class="card-header">
@@ -169,7 +163,7 @@
                             placeholder="Expliquez pourquoi cette tâche est bloquée..."
                         >{{ old('blocked_reason', $task->blocked_reason) }}</textarea>
 
-                        <small class="text-muted">
+                        <small class="text-body-secondary">
                             Obligatoire lorsque le statut est « Bloquée ».
                         </small>
                     </div>
@@ -183,7 +177,6 @@
         </div>
     @endcan
 
-    {{-- Actions réservées aux utilisateurs autorisés --}}
     @can('update', $task)
         <a href="{{ route('tasks.edit', $task) }}" class="btn btn-warning mb-3">
             Modifier la tâche
@@ -205,48 +198,65 @@
         </form>
     @endcan
 
-    {{-- Historique de la tâche --}}
+    <div id="task-history" class="card shadow-sm mt-4 mb-4">
+        <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-clock-history" aria-hidden="true"></i>
+            <h5 class="mb-0">Historique de la tâche</h5>
+        </div>
 
+        <div class="card-body">
+            @if($task->histories->isNotEmpty())
+                <ol class="list-unstyled mb-0">
+                    @foreach($task->histories as $history)
+                        @php($historyChanges = $history->changes())
+
+                        <li class="position-relative ps-4 pb-4 border-start border-2 border-primary-subtle">
+                            <span
+                                class="position-absolute top-0 start-0 translate-middle p-2 bg-primary border border-2 border-body rounded-circle"
+                                aria-hidden="true"
+                            ></span>
+
+                            <div class="fw-semibold">
+                                {{ $history->user?->name ?? 'Système' }}
+                                {{ $history->actionLabel() }}
+                            </div>
+
+                            <div class="text-body-secondary small mt-1">
+                                <i class="bi bi-calendar-event me-1" aria-hidden="true"></i>
+                                {{ $history->created_at?->format('d/m/Y H:i') }}
+                            </div>
+
+                            @if($historyChanges !== [])
+                                <div class="mt-2 d-flex flex-wrap gap-2">
+                                    @foreach($historyChanges as [$label, $oldValue, $newValue])
+                                        <span class="badge text-bg-secondary fw-normal">
+                                            {{ $label }} :
+                                            @if($history->action === 'created' || $oldValue === null)
+                                                {{ $newValue }}
+                                            @else
+                                                {{ $oldValue }}
+                                                <i class="bi bi-arrow-right mx-1" aria-hidden="true"></i>
+                                                {{ $newValue }}
+                                            @endif
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </li>
+                    @endforeach
+                </ol>
+            @else
+                <x-ui.empty-state
+                    icon="bi-clock-history"
+                    title="Aucun historique pour le moment"
+                    text="Les événements de cette tâche apparaîtront ici."
+                />
+            @endif
+        </div>
     </div>
-    <div class="card shadow-sm mt-4 mb-4">
-    <div class="card-header">
-        <h5 class="mb-0">Task History</h5>
-    </div>
 
-    <div class="card-body">
-        @forelse ($task->histories as $history)
-            <div class="border-bottom py-2">
-                <strong>{{ $history->user?->name ?? 'System' }}</strong>
-
-                {{ ucfirst(str_replace('_', ' ', $history->action)) }}
-
-                @if ($history->field)
-                    — {{ $history->field }}
-                @endif
-
-                <br>
-
-                <small class="text-muted">
-                    {{ $history->created_at?->format('d/m/Y H:i') }}
-                </small>
-
-                @if ($history->old_value !== null || $history->new_value !== null)
-                    <div>
-                        Old value: {{ $history->old_value ?? '—' }}
-                        <br>
-                        New value: {{ $history->new_value ?? '—' }}
-                    </div>
-                @endif
-            </div>
-        @empty
-            <p class="mb-0">No history recorded for this task yet.</p>
-        @endforelse
-    </div>
 </div>
 
-</div>
-
-{{-- JavaScript : afficher la justification uniquement si la tâche est bloquée --}}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
 
@@ -274,4 +284,3 @@
 </script>
 
 @endsection
-

@@ -13,18 +13,20 @@
     </div>
 
     <div class="row g-3">
-        {{-- Mes projets --}}
+        {{-- Mes projets : carte cliquable --}}
         <div class="col-sm-6 col-xl-4">
-            <x-stat-card
-                title="Mes projets"
-                :value="rescue(fn () => auth()->user()->managedProjects()->count(), 0, false)"
-                icon="bi-folder2-open"
-            />
+            <a href="{{ route('projects.index') }}" class="text-decoration-none text-reset d-block">
+                <x-stat-card
+                    title="Mes projets"
+                    :value="rescue(fn () => auth()->user()->managedProjects()->count(), 0, false)"
+                    icon="bi-folder2-open"
+                />
+            </a>
         </div>
 
         {{-- Tâches créées : carte cliquable --}}
         <div class="col-sm-6 col-xl-4">
-            <a href="{{ route('tasks.index') }}" class="text-decoration-none text-dark">
+            <a href="{{ route('tasks.index') }}" class="text-decoration-none text-reset d-block">
                 <x-stat-card
                     title="Tâches créées"
                     :value="rescue(fn () => auth()->user()->createdTasks()->count(), 0, false)"

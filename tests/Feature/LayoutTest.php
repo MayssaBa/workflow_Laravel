@@ -25,7 +25,9 @@ class LayoutTest extends TestCase
         $this->actingAs($manager)->get('/manager/dashboard')
             ->assertOk()
             ->assertSee('admin-sidebar')
-            ->assertSee('admin-nav-link');
+            ->assertSee('admin-nav-link')
+            ->assertSee('href="'.route('projects.index').'" class="text-decoration-none text-reset d-block"', false)
+            ->assertSee('href="'.route('tasks.index').'"', false);
     }
 
     public function test_employee_dashboard_has_sidebar_and_navlinks(): void
@@ -34,6 +36,8 @@ class LayoutTest extends TestCase
         $this->actingAs($employee)->get('/employee/dashboard')
             ->assertOk()
             ->assertSee('admin-sidebar')
-            ->assertSee('admin-nav-link');
+            ->assertSee('admin-nav-link')
+            ->assertSee('href="'.route('projects.index').'" class="text-decoration-none text-reset d-block"', false)
+            ->assertSee('href="'.route('tasks.index').'"', false);
     }
 }

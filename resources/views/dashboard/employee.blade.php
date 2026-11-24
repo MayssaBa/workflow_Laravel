@@ -13,13 +13,17 @@
 
     <div class="row g-3">
         <div class="col-sm-6 col-xl-4">
-            <x-stat-card title="Mes tâches"
-                :value="rescue(fn() => auth()->user()->assignedTasks()->count(), 0, false)" icon="bi-check2-square" />
+            <a href="{{ route('tasks.index') }}" class="text-decoration-none text-reset d-block">
+                <x-stat-card title="Mes tâches"
+                    :value="rescue(fn() => auth()->user()->assignedTasks()->count(), 0, false)" icon="bi-check2-square" />
+            </a>
         </div>
         <div class="col-sm-6 col-xl-4">
-            <x-stat-card title="Mes projets"
-                :value="rescue(fn() => auth()->user()->projects()->count(), 0, false)" icon="bi-folder2-open"
-                color="info" />
+            <a href="{{ route('projects.index') }}" class="text-decoration-none text-reset d-block">
+                <x-stat-card title="Mes projets"
+                    :value="rescue(fn() => auth()->user()->projects()->count(), 0, false)" icon="bi-folder2-open"
+                    color="info" />
+            </a>
         </div>
         <div class="col-sm-6 col-xl-4">
             <x-stat-card title="Demandes envoyées"

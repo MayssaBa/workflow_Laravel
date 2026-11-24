@@ -17,13 +17,13 @@
         'manager' => [
             ['manager.dashboard', 'Tableau de bord', 'manager.dashboard', 'bi-speedometer2'],
             ['projects.index', 'Projets', 'projects.*', 'bi-folder2-open'],
-            ['manager.task.index', 'Tâches', 'manager.task.*', 'bi-check2-square'],
+            ['tasks.index', 'Tâches', 'tasks.*', 'bi-check2-square'],
             ['request.index', 'Demandes', 'request.*', 'bi-chat-left-text'],
         ],
         'employee' => [
             ['employee.dashboard', 'Tableau de bord', 'employee.dashboard', 'bi-speedometer2'],
             ['projects.index', 'Projets', 'projects.*', 'bi-folder2-open'],
-            ['employee.task.index', 'Mes tâches', 'employee.task.*', 'bi-check2-square'],
+            ['tasks.index', 'Mes tâches', 'tasks.*', 'bi-check2-square'],
             ['request.index', 'Mes demandes', 'request.*', 'bi-chat-left-text'],
         ],
     ];
