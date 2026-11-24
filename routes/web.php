@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================
@@ -48,6 +49,40 @@ Route::middleware(['auth', 'active', 'role:employee'])
             return view('dashboard.employee');
         })->name('dashboard');
     });
+
+// ==========================================
+// ÉTAPE 2 – DEV B : PROJETS
+// ==========================================
+Route::middleware(['auth', 'active', 'role:manager'])->group(function () {
+    Route::get('/projects/create', [ProjectController::class, 'create'])
+        ->name('projects.create');
+
+    Route::post('/projects', [ProjectController::class, 'store'])
+        ->name('projects.store');
+
+    Route::get('/projects/{project}/edit', [ProjectController::class, 'edit'])
+        ->name('projects.edit');
+
+    Route::put('/projects/{project}', [ProjectController::class, 'update'])
+        ->name('projects.update');
+
+    Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])
+        ->name('projects.destroy');
+
+    Route::post('/projects/{project}/members', [ProjectController::class, 'attachMember'])
+        ->name('projects.members.store');
+
+    Route::delete('/projects/{project}/members/{user}', [ProjectController::class, 'detachMember'])
+        ->name('projects.members.destroy');
+});
+
+Route::middleware(['auth', 'active', 'role:admin,manager,employee'])->group(function () {
+    Route::get('/projects', [ProjectController::class, 'index'])
+        ->name('projects.index');
+
+    Route::get('/projects/{project}', [ProjectController::class, 'show'])
+        ->name('projects.show');
+});
 
 // ==========================================
 // HOMEPAGE

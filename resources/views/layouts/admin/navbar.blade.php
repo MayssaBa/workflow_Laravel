@@ -8,6 +8,7 @@
     $menus = [
         'admin' => [
             ['admin.dashboard', 'Tableau de bord', 'admin.dashboard', 'bi-speedometer2'],
+            ['projects.index', 'Projets', 'projects.*', 'bi-folder2-open'],
             ['admin.employees.index', 'Employés', 'admin.employees.*', 'bi-people'],
             ['admin.department.index', 'Départements', 'admin.department.*', 'bi-diagram-3'],
             ['admin.team.index', 'Équipes', 'admin.team.*', 'bi-person-workspace'],
@@ -15,12 +16,13 @@
         ],
         'manager' => [
             ['manager.dashboard', 'Tableau de bord', 'manager.dashboard', 'bi-speedometer2'],
-            ['manager.project.index', 'Projets', 'manager.project.*', 'bi-folder2-open'],
+            ['projects.index', 'Projets', 'projects.*', 'bi-folder2-open'],
             ['manager.task.index', 'Tâches', 'manager.task.*', 'bi-check2-square'],
             ['request.index', 'Demandes', 'request.*', 'bi-chat-left-text'],
         ],
         'employee' => [
             ['employee.dashboard', 'Tableau de bord', 'employee.dashboard', 'bi-speedometer2'],
+            ['projects.index', 'Projets', 'projects.*', 'bi-folder2-open'],
             ['employee.task.index', 'Mes tâches', 'employee.task.*', 'bi-check2-square'],
             ['request.index', 'Mes demandes', 'request.*', 'bi-chat-left-text'],
         ],
