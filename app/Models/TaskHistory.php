@@ -8,11 +8,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TaskHistory extends Model
 {
-    /** @use HasFactory<TaskHistoryFactory> */
     use HasFactory;
 
+    protected $table = 'task_histories';
+
     protected $fillable = [
+        'task_id',
+        'user_id',
         'action',
+        'field',
         'old_value',
         'new_value',
     ];
@@ -26,16 +30,4 @@ class TaskHistory extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-}
-?>
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class TaskHistory extends Model
-{
-    /** @use HasFactory<\Database\Factories\TaskHistoryFactory> */
-    use HasFactory;
 }
