@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\RequestController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
@@ -167,6 +168,29 @@ Route::middleware(['auth', 'active'])->group(function () {
     // Delete account
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
+});
+
+// ==========================================
+// ÉTAPE 3 – DEV B : DEMANDES
+// ==========================================
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/requests', [RequestController::class, 'index'])
+        ->name('requests.index');
+
+    Route::get('/requests/create', [RequestController::class, 'create'])
+        ->name('requests.create');
+
+    Route::post('/requests', [RequestController::class, 'store'])
+        ->name('requests.store');
+
+    Route::get('/requests/{internal_request}', [RequestController::class, 'show'])
+        ->name('requests.show');
+
+    Route::post('/requests/{internal_request}/replies', [RequestController::class, 'reply'])
+        ->name('requests.reply');
+
+    Route::patch('/requests/{internal_request}/close', [RequestController::class, 'close'])
+        ->name('requests.close');
 });
 
 // ==========================================

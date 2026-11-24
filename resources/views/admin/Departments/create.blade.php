@@ -3,60 +3,40 @@
 @section('title', 'Ajouter un département')
 
 @section('content')
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">Nouveau département</h1>
+            <p class="text-secondary mb-0">Remplissez le formulaire pour créer un département.</p>
+        </div>
 
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+        <a href="{{ route('admin.departments.index') }}" class="btn btn-outline-secondary">
+            Retour aux départements
+        </a>
+    </div>
 
-                <h1 class="text-2xl font-bold text-gray-800 mb-2">
-                    Nouveau département
-                </h1>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form action="{{ route('admin.departments.store') }}" method="POST">
+                @csrf
 
-                <p class="text-sm text-gray-500 mb-6">
-                    Remplissez le formulaire pour créer un département.
-                </p>
+                <div class="mb-3">
+                    <label for="name" class="form-label">Nom du département</label>
 
-                @if ($errors->any())
-                    <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
-                        <ul class="list-disc list-inside">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+                    <input type="text" id="name" name="name"
+                        class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}"
+                        placeholder="Exemple : Ressources humaines" required>
 
-                <form action="{{ route('admin.departments.store') }}" method="POST">
+                    @error('name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
 
-                    @csrf
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary">Enregistrer le département</button>
 
-                    <div class="mb-6">
-                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                            Nom du département
-                        </label>
-
-                        <input type="text" id="name" name="name" value="{{ old('name') }}"
-                            placeholder="Exemple : Ressources humaines" required
-                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    </div>
-
-                    <div class="flex justify-between items-center">
-
-                        <a href="{{ route('admin.departments.index') }}"
-                            class="px-5 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300">
-                            Annuler
-                        </a>
-
-                        <button type="submit" style="background-color: #4f46e5; color: white;"
-                            class="px-5 py-3 font-semibold rounded-lg shadow hover:opacity-90">
-                            Enregistrer le département
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
+                    <a href="{{ route('admin.departments.index') }}" class="btn btn-outline-secondary">Annuler</a>
+                </div>
+            </form>
         </div>
     </div>
 @endsection

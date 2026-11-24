@@ -26,9 +26,12 @@
             </a>
         </div>
         <div class="col-sm-6 col-xl-4">
-            <x-stat-card title="Demandes envoyées"
-                :value="rescue(fn() => \App\Models\InternalRequest::where('sender_id', auth()->id())->count(), 0, false)"
-                icon="bi-send" color="warning" />
+            <a href="{{ route('requests.index', ['tab' => 'sent']) }}"
+                class="text-decoration-none text-reset d-block">
+                <x-stat-card title="Demandes envoyées"
+                    :value="rescue(fn() => \App\Models\InternalRequest::where('sender_id', auth()->id())->count(), 0, false)"
+                    icon="bi-send" color="warning" />
+            </a>
         </div>
     </div>
 @endsection

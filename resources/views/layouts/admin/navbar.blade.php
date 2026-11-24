@@ -5,26 +5,30 @@
     $badgeClass = ['admin' => 'text-bg-primary', 'manager' => 'text-bg-info', 'employee' => 'text-bg-secondary'][$role];
     $homeRoute = $role . '.dashboard';
 
+    $pendingRequestsCount = \App\Models\InternalRequest::where('recipient_id', $user->id)
+        ->where('status', \App\Enums\RequestStatus::OPEN)
+        ->count();
+
     $menus = [
         'admin' => [
             ['admin.dashboard', 'Tableau de bord', 'admin.dashboard', 'bi-speedometer2'],
             ['projects.index', 'Projets', 'projects.*', 'bi-folder2-open'],
             ['admin.employees.index', 'Employés', 'admin.employees.*', 'bi-people'],
-            ['admin.department.index', 'Départements', 'admin.department.*', 'bi-diagram-3'],
-            ['admin.team.index', 'Équipes', 'admin.team.*', 'bi-person-workspace'],
-            ['request.index', 'Demandes', 'request.*', 'bi-chat-left-text'],
+            ['admin.departments.index', 'Départements', 'admin.departments.*', 'bi-diagram-3'],
+            ['admin.teams.index', 'Équipes', 'admin.teams.*', 'bi-person-workspace'],
+            ['requests.index', 'Demandes', 'requests.*', 'bi-chat-left-text'],
         ],
         'manager' => [
             ['manager.dashboard', 'Tableau de bord', 'manager.dashboard', 'bi-speedometer2'],
             ['projects.index', 'Projets', 'projects.*', 'bi-folder2-open'],
             ['tasks.index', 'Tâches', 'tasks.*', 'bi-check2-square'],
-            ['request.index', 'Demandes', 'request.*', 'bi-chat-left-text'],
+            ['requests.index', 'Demandes', 'requests.*', 'bi-chat-left-text'],
         ],
         'employee' => [
             ['employee.dashboard', 'Tableau de bord', 'employee.dashboard', 'bi-speedometer2'],
             ['projects.index', 'Projets', 'projects.*', 'bi-folder2-open'],
             ['tasks.index', 'Mes tâches', 'tasks.*', 'bi-check2-square'],
-            ['request.index', 'Mes demandes', 'request.*', 'bi-chat-left-text'],
+            ['requests.index', 'Demandes', 'requests.*', 'bi-chat-left-text'],
         ],
     ];
 @endphp
@@ -59,6 +63,9 @@
                         href="{{ route($name) }}" @if (request()->routeIs($pattern)) aria-current="page" @endif>
                         <span class="admin-nav-icon" aria-hidden="true"><i class="bi {{ $icon }}"></i></span>
                         <span>{{ $label }}</span>
+                        @if ($name === 'requests.index' && $pendingRequestsCount > 0)
+                            <span class="badge text-bg-warning ms-1">{{ $pendingRequestsCount }}</span>
+                        @endif
                     </a>
                 @else
                     <span class="admin-nav-link disabled" aria-disabled="true" title="bientôt disponible">

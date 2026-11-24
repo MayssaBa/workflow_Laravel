@@ -33,9 +33,11 @@
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <x-stat-card title="Demandes ouvertes"
-                :value="rescue(fn() => \App\Models\InternalRequest::where('status', 'open')->count(), 0, false)"
-                icon="bi-chat-left-text" color="warning" />
+            <a href="{{ route('requests.index') }}" class="text-decoration-none text-reset d-block">
+                <x-stat-card title="Demandes ouvertes"
+                    :value="rescue(fn() => \App\Models\InternalRequest::where('status', 'open')->count(), 0, false)"
+                    icon="bi-chat-left-text" color="warning" />
+            </a>
         </div>
     </div>
 @endsection

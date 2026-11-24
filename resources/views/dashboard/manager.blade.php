@@ -36,14 +36,17 @@
             </a>
         </div>
 
-        {{-- Demandes à traiter --}}
+        {{-- Demandes à traiter : carte cliquable --}}
         <div class="col-sm-6 col-xl-4">
-            <x-stat-card
-                title="Demandes à traiter"
-                :value="rescue(fn () => \App\Models\InternalRequest::where('recipient_id', auth()->id())->where('status', 'open')->count(), 0, false)"
-                icon="bi-chat-left-text"
-                color="warning"
-            />
+            <a href="{{ route('requests.index', ['tab' => 'received']) }}"
+                class="text-decoration-none text-reset d-block">
+                <x-stat-card
+                    title="Demandes à traiter"
+                    :value="rescue(fn () => \App\Models\InternalRequest::where('recipient_id', auth()->id())->where('status', 'open')->count(), 0, false)"
+                    icon="bi-chat-left-text"
+                    color="warning"
+                />
+            </a>
         </div>
     </div>
 @endsection
