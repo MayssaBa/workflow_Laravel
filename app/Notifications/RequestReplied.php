@@ -2,22 +2,21 @@
 
 namespace App\Notifications;
 
+use App\Models\InternalRequest;
+use App\Models\RequestReply;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class RequestReplied extends Notification
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(
+        public InternalRequest $internalRequest,
+        public User $author,
+        public RequestReply $reply,
+    ) {}
 
     /**
      * Get the notification's delivery channels.
@@ -26,18 +25,7 @@ class RequestReplied extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+        return ['database'];
     }
 
     /**
@@ -48,7 +36,12 @@ class RequestReplied extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'title' => 'Nouvelle réponse à une demande',
+            'message' => InternalRequest::participantName($this->author).' a répondu à la demande « '.$this->internalRequest->subject.' ».',
+            'request_title' => $this->internalRequest->subject,
+            'author_name' => InternalRequest::participantName($this->author),
+            'reply' => $this->reply->body,
+            'url' => route('requests.show', $this->internalRequest),
         ];
     }
 }

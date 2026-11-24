@@ -10,15 +10,14 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class IssueFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    /** @var string */
+    protected $model = Issue::class;
+
+    /** @return array<string, mixed> */
     public function definition(): array
     {
         return [
-            //
+            'status' => 'open',
         ];
     }
 }

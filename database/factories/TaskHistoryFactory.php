@@ -10,15 +10,14 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class TaskHistoryFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    /** @var string */
+    protected $model = TaskHistory::class;
+
+    /** @return array<string, mixed> */
     public function definition(): array
     {
         return [
-            //
+            'action' => 'created',
         ];
     }
 }

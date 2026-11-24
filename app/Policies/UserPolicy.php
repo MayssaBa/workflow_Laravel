@@ -3,63 +3,80 @@
 namespace App\Policies;
 
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class UserPolicy
 {
     /**
-     * Determine whether the user can view any models.
+     * Voir la liste des utilisateurs.
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 
     /**
-     * Determine whether the user can view the model.
+     * Consulter un utilisateur.
      */
     public function view(User $user, User $model): bool
     {
+        // L'administrateur peut consulter tous les utilisateurs.
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        // Un utilisateur peut consulter son propre profil.
+        if ($user->id === $model->id) {
+            return true;
+        }
+
+        // Un manager peut consulter les membres de sa propre équipe.
+        if ($user->isManager()) {
+            return $user->team_id !== null
+                && $user->team_id === $model->team_id;
+        }
+
         return false;
     }
 
     /**
-     * Determine whether the user can create models.
+     * Ajouter un utilisateur.
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Modifier un utilisateur.
      */
     public function update(User $user, User $model): bool
     {
-        return false;
+        // L'administrateur peut modifier tous les utilisateurs.
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        // Un utilisateur peut modifier son propre profil.
+        return $user->id === $model->id;
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * Désactiver ou supprimer un utilisateur.
      */
     public function delete(User $user, User $model): bool
     {
-        return false;
+        // Un administrateur peut désactiver les autres utilisateurs,
+        // mais pas son propre compte.
+        return $user->isAdmin() && $user->id !== $model->id;
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
     public function restore(User $user, User $model): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
     public function forceDelete(User $user, User $model): bool
     {
-        return false;
+        return $user->isAdmin() && $user->id !== $model->id;
     }
 }

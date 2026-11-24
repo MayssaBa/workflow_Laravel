@@ -4,60 +4,82 @@ namespace App\Policies;
 
 use App\Models\Task;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class TaskPolicy
 {
     /**
-     * Determine whether the user can view any models.
+     * Voir la liste des tâches.
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->isManager() || $user->isEmployee();
     }
 
     /**
-     * Determine whether the user can view the model.
+     * Consulter une tâche.
      */
     public function view(User $user, Task $task): bool
     {
-        return false;
+        // Le manager peut consulter toutes les tâches.
+        if ($user->isManager()) {
+            return true;
+        }
+
+        // L'employé peut consulter uniquement ses propres tâches.
+        return $user->isEmployee()
+            && $task->assigned_to === $user->id;
     }
 
     /**
-     * Determine whether the user can create models.
+     * Créer une tâche.
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isManager();
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Modifier les informations générales d'une tâche.
+     * Seul le manager peut le faire.
      */
     public function update(User $user, Task $task): bool
     {
-        return false;
+        return $user->isManager();
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * Modifier uniquement le statut d'une tâche.
+     */
+    public function updateStatus(User $user, Task $task): bool
+    {
+        // Le manager peut modifier le statut de toutes les tâches.
+        if ($user->isManager()) {
+            return true;
+        }
+
+        // L'employé peut modifier le statut de ses propres tâches.
+        return $user->isEmployee()
+            && $task->assigned_to === $user->id;
+    }
+
+    /**
+     * Supprimer une tâche.
      */
     public function delete(User $user, Task $task): bool
     {
-        return false;
+        return $user->isManager();
     }
 
     /**
-     * Determine whether the user can restore the model.
+     * Restaurer une tâche supprimée logiquement.
      */
     public function restore(User $user, Task $task): bool
     {
-        return false;
+        return $user->isManager();
     }
 
     /**
-     * Determine whether the user can permanently delete the model.
+     * Suppression définitive.
      */
     public function forceDelete(User $user, Task $task): bool
     {

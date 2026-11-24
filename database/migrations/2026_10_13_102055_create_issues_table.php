@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('issues', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('task_id')->constrained('tasks')->cascadeOnDelete();
+            $table->foreignId('resolved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
     }

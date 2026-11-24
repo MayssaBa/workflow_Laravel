@@ -3,63 +3,123 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
+use App\Models\Team;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class TeamController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Afficher la liste des équipes.
      */
-    public function index()
+    public function index(): View
     {
-        //
+        $teams = Team::with('department')
+            ->withCount('users')
+            ->orderBy('name')
+            ->paginate(10);
+
+        return view('admin.teams.index', compact('teams'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Afficher le formulaire d'ajout.
      */
-    public function create()
+    public function create(): View
     {
-        //
+        $departments = Department::orderBy('name')->get();
+
+        return view('admin.teams.create', compact('departments'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Enregistrer une nouvelle équipe.
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        //
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:teams,name',
+            ],
+            'department_id' => [
+                'required',
+                'exists:departments,id',
+            ],
+        ]);
+
+        Team::create($validated);
+
+        return redirect()
+            ->route('admin.teams.index')
+            ->with('success', 'Équipe ajoutée avec succès.');
     }
 
     /**
-     * Display the specified resource.
+     * Consulter une équipe.
      */
-    public function show(string $id)
+    public function show(Team $team): View
     {
-        //
+        $team->load(['department', 'users']);
+
+        return view('admin.teams.show', compact('team'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Afficher le formulaire de modification.
      */
-    public function edit(string $id)
+    public function edit(Team $team): View
     {
-        //
+        $departments = Department::orderBy('name')->get();
+
+        return view('admin.teams.edit', compact('team', 'departments'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * Modifier une équipe.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Team $team): RedirectResponse
     {
-        //
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('teams', 'name')->ignore($team->id),
+            ],
+            'department_id' => [
+                'required',
+                'exists:departments,id',
+            ],
+        ]);
+
+        $team->update($validated);
+
+        return redirect()
+            ->route('admin.teams.index')
+            ->with('success', 'Équipe modifiée avec succès.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Supprimer une équipe.
      */
-    public function destroy(string $id)
+    public function destroy(Team $team): RedirectResponse
     {
-        //
+        if ($team->users()->exists()) {
+            return redirect()
+                ->route('admin.teams.index')
+                ->with('error', 'Impossible de supprimer cette équipe : elle contient encore des employés.');
+        }
+
+        $team->delete();
+
+        return redirect()
+            ->route('admin.teams.index')
+            ->with('success', 'Équipe supprimée avec succès.');
     }
 }

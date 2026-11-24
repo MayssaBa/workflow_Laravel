@@ -10,15 +10,14 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class RequestReplyFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    /** @var string */
+    protected $model = RequestReply::class;
+
+    /** @return array<string, mixed> */
     public function definition(): array
     {
         return [
-            //
+            'body' => fake()->paragraph(),
         ];
     }
 }

@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Project;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ProjectPolicy
 {
@@ -13,7 +12,7 @@ class ProjectPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->isAdmin() || $user->isManager() || $user->isEmployee();
     }
 
     /**
@@ -21,7 +20,15 @@ class ProjectPolicy
      */
     public function view(User $user, Project $project): bool
     {
-        return false;
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        if ($user->isManager()) {
+            return $project->manager_id === $user->id;
+        }
+
+        return $project->users()->whereKey($user->id)->exists();
     }
 
     /**
@@ -29,7 +36,7 @@ class ProjectPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->isManager();
     }
 
     /**
@@ -37,7 +44,7 @@ class ProjectPolicy
      */
     public function update(User $user, Project $project): bool
     {
-        return false;
+        return $user->isManager() && $project->manager_id === $user->id;
     }
 
     /**
@@ -45,7 +52,15 @@ class ProjectPolicy
      */
     public function delete(User $user, Project $project): bool
     {
-        return false;
+        return $user->isManager() && $project->manager_id === $user->id;
+    }
+
+    /**
+     * Determine whether the user can manage the project members.
+     */
+    public function manageMembers(User $user, Project $project): bool
+    {
+        return $user->isManager() && $project->manager_id === $user->id;
     }
 
     /**
