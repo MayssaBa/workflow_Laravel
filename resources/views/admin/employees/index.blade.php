@@ -6,13 +6,25 @@
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
         <div>
             <h1 class="h3 fw-bold mb-1">Gestion des employés</h1>
-            <p class="text-secondary mb-0">Gérez les employés de votre organisation.</p>
+            <p class="text-secondary mb-0">Gérer les employés de votre organisation.</p>
         </div>
 
         <a href="{{ route('admin.employees.create') }}" class="btn btn-primary">
-            Ajouter un employé
+            + Ajouter un employé
         </a>
     </div>
+
+    @if (session('success'))
+        <div class="alert alert-success" role="alert">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger" role="alert">
+            {{ session('error') }}
+        </div>
+    @endif
 
     <div class="card shadow-sm">
         <div class="card-body">
@@ -37,30 +49,46 @@
                                 <td class="fw-semibold">{{ $employee->name }}</td>
                                 <td>{{ $employee->email }}</td>
                                 <td>{{ $employee->phone ?? 'Non renseigné' }}</td>
-                                <td>{{ $employee->team->name ?? 'Non affecté' }}</td>
-                                <td>{{ $employee->team->department->name ?? 'Non affecté' }}</td>
+                                <td>{{ $employee->team->name ?? 'Aucune équipe' }}</td>
+                                <td>{{ $employee->team->department->name ?? 'Aucun département' }}</td>
                                 <td>
-                                    <x-status-badge :status="$employee->is_active ? 'active' : 'inactive'" />
+                                    @if ($employee->is_active)
+                                        <span class="badge text-bg-success">Actif</span>
+                                    @else
+                                        <span class="badge text-bg-danger">Désactivé</span>
+                                    @endif
                                 </td>
                                 <td class="text-end text-nowrap">
                                     <a href="{{ route('admin.employees.show', $employee) }}"
-                                        class="btn btn-sm btn-outline-primary">Consulter</a>
+                                        class="btn btn-sm btn-outline-primary">Voir</a>
 
-                                    <span class="btn btn-sm btn-outline-secondary disabled" aria-disabled="true"
-                                        title="bientôt disponible">Modifier</span>
+                                    <a href="{{ route('admin.employees.edit', $employee) }}"
+                                        class="btn btn-sm btn-outline-secondary">Modifier</a>
+
+                                    @if ($employee->is_active)
+                                        <form action="{{ route('admin.employees.destroy', $employee) }}" method="POST"
+                                            class="d-inline" onsubmit="return confirm('Voulez-vous vraiment désactiver cet employé ?');">
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Désactiver</button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('admin.employees.activate', ['employee' => $employee->id]) }}"
+                                            method="POST" class="d-inline"
+                                            onsubmit="return confirm('Voulez-vous vraiment réactiver cet employé ?');">
+                                            @csrf
+
+                                            <button type="submit" class="btn btn-sm btn-outline-success">Réactiver</button>
+                                        </form>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
                                 <td colspan="7">
-                                    <x-ui.empty-state icon="bi-people" title="Aucun employé"
-                                        text="Ajoutez un premier employé pour commencer.">
-                                        <x-slot:action>
-                                            <a href="{{ route('admin.employees.create') }}" class="btn btn-primary btn-sm">
-                                                Ajouter un employé
-                                            </a>
-                                        </x-slot:action>
-                                    </x-ui.empty-state>
+                                    <x-ui.empty-state icon="bi-people" title="Aucun employé trouvé"
+                                        text="Ajoutez un premier employé pour commencer." />
                                 </td>
                             </tr>
                         @endforelse

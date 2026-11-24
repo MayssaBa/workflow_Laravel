@@ -1,50 +1,60 @@
 <?php
 
+use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================
-// ADMIN ROUTES
+// ADMINISTRATION
 // ==========================================
+
 Route::middleware(['auth', 'active', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
 
-        // Admin Dashboard
         Route::get('/dashboard', function () {
             return view('dashboard.admin');
         })->name('dashboard');
 
-        // Employees
+        // Gestion des employés
+        Route::post('/employees/{employee}/activate', [EmployeeController::class, 'activate'])
+            ->name('employees.activate');
+
         Route::resource('employees', EmployeeController::class);
+
+        Route::resource('departments', DepartmentController::class);
+
+        Route::resource('teams', TeamController::class);
     });
 
 // ==========================================
-// MANAGER ROUTES
+// MANAGER
 // ==========================================
+
 Route::middleware(['auth', 'active', 'role:manager'])
     ->prefix('manager')
     ->name('manager.')
     ->group(function () {
 
-        // Manager Dashboard
         Route::get('/dashboard', function () {
             return view('dashboard.manager');
         })->name('dashboard');
     });
 
 // ==========================================
-// EMPLOYEE ROUTES
+// EMPLOYEE
 // ==========================================
+
 Route::middleware(['auth', 'active', 'role:employee'])
     ->prefix('employee')
     ->name('employee.')
     ->group(function () {
 
-        // Employee Dashboard
         Route::get('/dashboard', function () {
             return view('dashboard.employee');
         })->name('dashboard');
@@ -85,15 +95,17 @@ Route::middleware(['auth', 'active', 'role:admin,manager,employee'])->group(func
 });
 
 // ==========================================
-// HOMEPAGE
+// PAGE D'ACCUEIL
 // ==========================================
+
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
 // ==========================================
-// GENERAL DASHBOARD REDIRECTION
+// REDIRECTION DU DASHBOARD
 // ==========================================
+
 Route::middleware(['auth', 'active'])
     ->get('/dashboard', function () {
 
@@ -112,19 +124,39 @@ Route::middleware(['auth', 'active'])
     })->name('dashboard');
 
 // ==========================================
-// PROFILE ROUTES
+// GESTION DES TACHES
 // ==========================================
+
 Route::middleware(['auth', 'active'])->group(function () {
 
-    // Display profile
+    Route::resource('tasks', TaskController::class)
+        ->only([
+            'index',
+            'create',
+            'store',
+            'show',
+            'edit',
+            'update',
+            'destroy',
+        ]);
+
+    // Modifier uniquement le statut d'une tâche
+    Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus'])
+        ->name('tasks.updateStatus');
+});
+
+// ==========================================
+// PROFIL UTILISATEUR
+// ==========================================
+
+Route::middleware(['auth', 'active'])->group(function () {
+
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 
-    // Update name, email and phone
     Route::patch('/profile', [ProfileController::class, 'update'])
         ->name('profile.update');
 
-    // Update password
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])
         ->name('profile.password.update');
 
@@ -138,6 +170,7 @@ Route::middleware(['auth', 'active'])->group(function () {
 });
 
 // ==========================================
-// AUTHENTICATION ROUTES
+// AUTHENTIFICATION
 // ==========================================
+
 require __DIR__.'/auth.php';

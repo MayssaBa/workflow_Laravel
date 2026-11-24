@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Team;
-use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -15,7 +15,7 @@ use Illuminate\View\View;
 class EmployeeController extends Controller
 {
     /**
-     * Display all employees.
+     * Afficher la liste des employés.
      */
     public function index(): View
     {
@@ -30,7 +30,7 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Show the form to create an employee.
+     * Afficher le formulaire d'ajout.
      */
     public function create(): View
     {
@@ -44,7 +44,7 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Store a new employee.
+     * Enregistrer un nouvel employé.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -74,7 +74,7 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Display one employee.
+     * Consulter les informations d'un employé.
      */
     public function show(User $employee): View
     {
@@ -88,7 +88,7 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Show the form to edit an employee.
+     * Afficher le formulaire de modification.
      */
     public function edit(User $employee): View
     {
@@ -104,7 +104,7 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Update an employee.
+     * Modifier un employé.
      */
     public function update(Request $request, User $employee): RedirectResponse
     {
@@ -118,7 +118,6 @@ class EmployeeController extends Controller
                 'required',
                 'email',
                 'lowercase',
-                'max:255',
                 Rule::unique('users', 'email')->ignore($employee->id),
             ],
             'phone' => ['nullable', 'string', 'max:20'],
@@ -131,7 +130,7 @@ class EmployeeController extends Controller
         $employee->phone = $validated['phone'] ?? null;
         $employee->team_id = $validated['team_id'] ?? null;
 
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $employee->password = Hash::make($validated['password']);
         }
 
@@ -143,22 +142,45 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Deactivate an employee instead of deleting the account.
+     * Désactiver un employé.
      */
     public function destroy(User $employee): RedirectResponse
+    {
+        Gate::authorize('delete', $employee);
+
+        abort_unless($employee->role === 'employee', 404);
+
+        if ($employee->id === auth()->id()) {
+            return back()->with(
+                'error',
+                'Vous ne pouvez pas désactiver votre propre compte.'
+            );
+        }
+
+        $employee->update([
+            'is_active' => false,
+        ]);
+
+        return redirect()
+            ->route('admin.employees.index')
+            ->with('success', 'Employé désactivé avec succès.');
+    }
+
+    /**
+     * Réactiver un employé.
+     */
+    public function activate(User $employee): RedirectResponse
     {
         Gate::authorize('update', $employee);
 
         abort_unless($employee->role === 'employee', 404);
 
-        if ($employee->id === auth()->id()) {
-            return back()->with('error', 'Vous ne pouvez pas désactiver votre propre compte.');
-        }
-
-        $employee->update(['is_active' => false]);
+        $employee->update([
+            'is_active' => true,
+        ]);
 
         return redirect()
             ->route('admin.employees.index')
-            ->with('success', 'Employé désactivé avec succès.');
+            ->with('success', 'Employé réactivé avec succès.');
     }
 }

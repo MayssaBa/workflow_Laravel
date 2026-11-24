@@ -16,6 +16,8 @@ class TaskHistoryFactory extends Factory
     /** @return array<string, mixed> */
     public function definition(): array
     {
-        return [];
+        return [
+            'action' => 'created',
+        ];
     }
 }
