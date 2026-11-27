@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\TeamController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RequestController;
@@ -18,9 +19,8 @@ Route::middleware(['auth', 'active', 'role:admin'])
     ->name('admin.')
     ->group(function () {
 
-        Route::get('/dashboard', function () {
-            return view('dashboard.admin');
-        })->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'show'])
+            ->name('dashboard');
 
         // Gestion des employés
         Route::post('/employees/{employee}/activate', [EmployeeController::class, 'activate'])
@@ -42,10 +42,12 @@ Route::middleware(['auth', 'active', 'role:manager'])
     ->name('manager.')
     ->group(function () {
 
-        Route::get('/dashboard', function () {
-            return view('dashboard.manager');
-        })->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'show'])
+            ->name('dashboard');
+        Route::get('/issues', [\App\Http\Controllers\IssueController::class, 'index'])
+            ->name('issues.index');
     });
+
 
 // ==========================================
 // EMPLOYEE
@@ -64,7 +66,9 @@ Route::middleware(['auth', 'active', 'role:employee'])
 // ==========================================
 // ÉTAPE 2 – DEV B : PROJETS
 // ==========================================
+
 Route::middleware(['auth', 'active', 'role:manager'])->group(function () {
+
     Route::get('/projects/create', [ProjectController::class, 'create'])
         ->name('projects.create');
 
@@ -88,6 +92,7 @@ Route::middleware(['auth', 'active', 'role:manager'])->group(function () {
 });
 
 Route::middleware(['auth', 'active', 'role:admin,manager,employee'])->group(function () {
+
     Route::get('/projects', [ProjectController::class, 'index'])
         ->name('projects.index');
 
@@ -173,7 +178,9 @@ Route::middleware(['auth', 'active'])->group(function () {
 // ==========================================
 // ÉTAPE 3 – DEV B : DEMANDES
 // ==========================================
+
 Route::middleware(['auth', 'active'])->group(function () {
+
     Route::get('/requests', [RequestController::class, 'index'])
         ->name('requests.index');
 
@@ -197,4 +204,4 @@ Route::middleware(['auth', 'active'])->group(function () {
 // AUTHENTIFICATION
 // ==========================================
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

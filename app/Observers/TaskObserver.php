@@ -31,21 +31,28 @@ class TaskObserver
     public function updated(Task $task): void
     {
         $changes = $task->getChanges();
-        $original = $task->getOriginal();
+        $previous = $task->getPrevious();
 
         unset($changes['updated_at']);
 
         foreach ($changes as $field => $newValue) {
 
-            $oldValue = $original[$field] ?? null;
+            $oldValue = $previous[$field] ?? null;
 
-            if ($field === 'assigned_to') {
-                $action = 'assigned';
-            } elseif ($field === 'status' && $newValue === 'done') {
+            // Task reorganization.
+            if (in_array($field, ['priority', 'due_date', 'assigned_to'], true)) {
+                $action = 'reorganized';
+            }
+            // Task completion.
+            elseif ($field === 'status' && $newValue === 'done') {
                 $action = 'closed';
-            } elseif ($field === 'status') {
+            }
+            // Other status changes.
+            elseif ($field === 'status') {
                 $action = 'status_changed';
-            } else {
+            }
+            // Other modifications.
+            else {
                 $action = 'updated';
             }
 
@@ -54,8 +61,12 @@ class TaskObserver
                 'user_id' => auth()->id(),
                 'action' => $action,
                 'field' => $field,
-                'old_value' => $oldValue === null ? null : (string) $oldValue,
-                'new_value' => $newValue === null ? null : (string) $newValue,
+                'old_value' => $oldValue === null
+                    ? null
+                    : (string) $oldValue,
+                'new_value' => $newValue === null
+                    ? null
+                    : (string) $newValue,
             ]);
         }
     }

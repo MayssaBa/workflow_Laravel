@@ -2,13 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Services\DashboardService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public static function show()
+    public function show(DashboardService $dashboardService): View
     {
-        return view('dashboard');
-    }
+        $user = Auth::user();
 
+        if ($user->isAdmin()) {
+            return view(
+                'dashboard.admin',
+                $dashboardService->adminDashboard()
+            );
+        }
+
+        if ($user->isManager()) {
+            return view(
+                'dashboard.manager',
+                $dashboardService->managerDashboard()
+            );
+        }
+
+        abort(403, 'You are not authorized to access this dashboard.');
+    }
 }

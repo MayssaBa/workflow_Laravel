@@ -77,6 +77,7 @@ class TaskHistory extends Model
     /**
      * @return array<int, array{0: string, 1: string|null, 2: string|null}>
      */
+
     public function changes(): array
     {
         $changes = [];
@@ -84,30 +85,31 @@ class TaskHistory extends Model
         foreach ($this->decodedValues() as $field => $newValue) {
             $field = (string) $field;
 
-            if (in_array($field, self::IGNORED_FIELDS, true) || ! array_key_exists($field, self::FIELD_LABELS)) {
+            if (
+                in_array($field, self::IGNORED_FIELDS, true)
+                || !array_key_exists($field, self::FIELD_LABELS)
+            ) {
                 continue;
             }
 
             $formattedNewValue = $this->formatValue($field, $newValue);
             $formattedOldValue = null;
 
-            if ($this->action !== 'created' && ! $this->isBlank($this->old_value)) {
-                $formattedOldValue = $this->formatValue($field, $this->decodeValue($this->old_value));
-            }
-
-            if ($this->isBlank($formattedOldValue) && $this->isBlank($formattedNewValue)) {
-                continue;
+            if ($this->action !== 'created') {
+                $oldValue = $this->decodeValue($this->old_value);
+                $formattedOldValue = $this->formatValue($field, $oldValue);
             }
 
             $changes[] = [
                 self::FIELD_LABELS[$field],
-                $formattedOldValue,
-                $formattedNewValue,
+                $formattedOldValue ?? 'Aucune valeur',
+                $formattedNewValue ?? 'Aucune valeur',
             ];
         }
 
         return $changes;
     }
+
 
     /**
      * @param  array<string, string>  $projectNames
@@ -165,14 +167,14 @@ class TaskHistory extends Model
 
         foreach ($values as $value) {
             if (is_array($value)) {
-                if (array_key_exists($field, $value) && ! $this->isBlank($value[$field])) {
+                if (array_key_exists($field, $value) && !$this->isBlank($value[$field])) {
                     $ids[] = (string) $value[$field];
                 }
 
                 continue;
             }
 
-            if (! $this->isBlank($value)) {
+            if (!$this->isBlank($value)) {
                 $ids[] = (string) $value;
             }
         }
@@ -207,7 +209,7 @@ class TaskHistory extends Model
 
     private function formatValue(string $field, mixed $value): ?string
     {
-        if ($this->isBlank($value) || ! is_scalar($value)) {
+        if ($this->isBlank($value) || !is_scalar($value)) {
             return null;
         }
 
